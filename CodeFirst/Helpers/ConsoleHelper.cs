@@ -3,8 +3,6 @@ using CodeFirst.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CodeFirst.Helpers
 {
@@ -12,107 +10,240 @@ namespace CodeFirst.Helpers
     {
         public static void AddClientHelper()
         {
-            Console.WriteLine("Nom ?");
-            string? name = Console.ReadLine();
-            Console.WriteLine("Age ?");
-            string? ageS = Console.ReadLine();
-            int age = 0;
-            int.TryParse(ageS, out age);
-            Console.WriteLine("Adresse ?");
-            string? address = Console.ReadLine();
-            Console.WriteLine("Ville ?");
-            string? city = Console.ReadLine();
-            Console.WriteLine("Email ?");
-            string? mail = Console.ReadLine();
+            string? name = PromptDisplayHelpers.PromptString("Nom ?");
+            int age = PromptDisplayHelpers.PromptInt("Age ?");
+            string? address = PromptDisplayHelpers.PromptString("Adresse ?");
+            string? city = PromptDisplayHelpers.PromptString("Ville ?");
+            string? mail = PromptDisplayHelpers.PromptString("Email ?");
 
             ClientRepository.AddClient(name, age, address, city, mail);
         }
-        public static void AddProductHelper() 
+        public static void GetAllClientsWithProductsHelper()
         {
-            Console.WriteLine("Nom du produit ?");
-            string? name = Console.ReadLine();
-
-            Console.WriteLine("Type ? 0(Poissons) 1(Viandes) 2(Fruits) 3(Legumes) 4(Fromages) 5(Patisseries) 6(Pains) 7(Conserves) 8(Sugelés)");
-            string? typeS = Console.ReadLine();
-
-            Console.WriteLine("Description ?");
-            string? description = Console.ReadLine();
-
-            Console.WriteLine("Prix ?");
-            string? priceS = Console.ReadLine();
-            double price = 0;
-            double.TryParse(priceS, out price);
-
-            ProductType productType = ProductType.Poissons;
-            switch (typeS)
-            {
-                case "0":
-                    productType = ProductType.Poissons;
-                    break;
-                case "1":
-                    productType = ProductType.Viandes;
-                    break;
-                case "2":
-                    productType = ProductType.Fruits;
-                    break;
-                case "3":
-                    productType = ProductType.Legumes;
-                    break;
-                case "4":
-                    productType = ProductType.Fromages;
-                    break;
-                case "5":
-                    productType = ProductType.Patisseries;
-                    break;
-                case "6":
-                    productType = ProductType.Pains;
-                    break;
-                case "7":
-                    productType = ProductType.Conserves;
-                    break;
-                case "8":
-                    productType = ProductType.Suregelés;
-                    break;
-                default:
-                    productType = ProductType.Poissons;
-                    break;
-            }
-
-            Console.WriteLine("Sélectionnez un client pour ce produit :");
-            List<Client> clients = ClientRepository.GetAll();
+            List<Client> clients = ClientRepository.GetAllClientsWithProducts();
             foreach (Client client in clients)
             {
-                Console.WriteLine($"{client.Id} - {client.Name}");
-            }
-            string? clientIdS = Console.ReadLine();
-            int clientId = 0;
-            int.TryParse(clientIdS, out clientId);
-
-            ProductRepository.AddProduct(name, productType, description, price, clientId);
-        }
-
-        public static void GetAllClientsWithProductsHelper() 
-        {
-            List<Client> people = ClientRepository.GetAllClientsWithProducts();
-
-            foreach (Client c in people)
-            {
-                Console.WriteLine($"{c.Id} {c.Name} {c.Age}");
-
-                foreach (Product p in c.Products)
+                Console.WriteLine($"{client.Id} {client.Name} {client.Age}");
+                foreach (Product product in client.Products)
                 {
-                    Console.WriteLine($"{p.Name} {p.Type}");
+                    Console.WriteLine($"{product.Name} {product.Type}");
                 }
             }
         }
-
-        public static void GetAllClientsHelper() 
+        public static void GetAllClientsHelper()
         {
-            List<Client> people = ClientRepository.GetAll();
+            List<Client> clients = ClientRepository.GetAll();
+            PromptDisplayHelpers.DisplayClients(clients);
+        }
 
-            foreach (Client client in people)
+        public static void GetClientByIdWithProductsHelper()
+        {
+            int clientId = PromptDisplayHelpers.PromptInt("Entrez l'ID du client :");
+
+            Client client = ClientRepository.GetClientById(clientId);
+
+            if (client != null)
             {
-                Console.WriteLine($"{client.Id} {client.Name} {client.Age}");
+                PromptDisplayHelpers.DisplayOneClient(client);
+            }
+            else
+            {
+                Console.WriteLine("Client introuvable.");
+            }
+        }
+
+        public static void EditClientHelper()
+        {
+            try
+            {
+                Console.WriteLine("Modifier quel client ?");
+                List<Client> clients = ClientRepository.GetAll();
+                if (clients.Count == 0)
+                {
+                    Console.WriteLine("Aucun client disponible.");
+                    return;
+                }
+
+                PromptDisplayHelpers.DisplayClients(clients);
+                int clientId = PromptDisplayHelpers.PromptInt("ID du client ?");
+                Client? existingClient = clients.FirstOrDefault(c => c.Id == clientId);
+                if (existingClient == null)
+                {
+                    Console.WriteLine("Client introuvable.");
+                    return;
+                }
+
+                string? name = PromptDisplayHelpers.PromptString("Nom ?");
+                string? address = PromptDisplayHelpers.PromptString("Adresse ?");
+                string? city = PromptDisplayHelpers.PromptString("Ville ?");
+                string? mail = PromptDisplayHelpers.PromptString("Email ?");
+
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(address) ||
+                    string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(mail) || !mail.Contains("@"))
+                {
+                    Console.WriteLine("Entrée invalide.");
+                    return;
+                }
+
+                Client updatedClient = new Client
+                {
+                    Id = existingClient.Id,
+                    Name = name,
+                    Address = address,
+                    City = city,
+                    Mail = mail
+                };
+
+                ClientRepository.EditClientbyId(updatedClient);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur: {ex.Message}");
+            }
+        }
+        public static void RemoveClientHelper()
+        {
+            List<Client> clients = ClientRepository.GetAll();
+            PromptDisplayHelpers.DisplayClients(clients);
+            int clientId = PromptDisplayHelpers.PromptInt("ID du client ?");
+            ClientRepository.RemoveClientById(clientId);
+        }
+
+        //**************************************************************************************************************************************************
+
+
+        public static void AddProductHelper()
+        {
+            string? name = PromptDisplayHelpers.PromptString("Nom du produit ?");
+            string? typeS = PromptDisplayHelpers.PromptString("Type ? 0(Poissons) 1(Viandes) 2(Fruits) 3(Legumes) 4(Fromages) 5(Patisseries) 6(Pains) 7(Conserves) 8(Surégelés)");
+            string? description = PromptDisplayHelpers.PromptString("Description ?");
+            double price = PromptDisplayHelpers.PromptDouble("Prix ?");
+
+            ProductType productType = typeS switch
+            {
+                "1" => ProductType.Viandes,
+                "2" => ProductType.Fruits,
+                "3" => ProductType.Legumes,
+                "4" => ProductType.Fromages,
+                "5" => ProductType.Patisseries,
+                "6" => ProductType.Pains,
+                "7" => ProductType.Conserves,
+                "8" => ProductType.Suregelés,
+                _ => ProductType.Poissons
+            };
+
+            Console.WriteLine("Sélectionnez un client pour ce produit :");
+            List<Client> clients = ClientRepository.GetAll();
+            PromptDisplayHelpers.DisplayClients(clients);
+            int clientId = PromptDisplayHelpers.PromptInt("ID du client ?");
+
+            ProductRepository.AddProduct(name, productType, description, price, clientId);
+        }
+        public static void AddProductToClientHelper()
+        {
+            Console.WriteLine("ID du client auquel ajouter un produit:");
+            int clientId = PromptDisplayHelpers.PromptInt("Entrez l'ID du client : ");
+            string? name = PromptDisplayHelpers.PromptString("Nom du produit ?");
+            string? typeS = PromptDisplayHelpers.PromptString("Type ? 0(Poissons) 1(Viandes) 2(Fruits) 3(Legumes) 4(Fromages) 5(Patisseries) 6(Pains) 7(Conserves) 8(Surégelés)");
+            string? description = PromptDisplayHelpers.PromptString("Description ?");
+            double price = PromptDisplayHelpers.PromptDouble("Prix ?");
+
+            ProductType productType = typeS switch
+            {
+                "1" => ProductType.Viandes,
+                "2" => ProductType.Fruits,
+                "3" => ProductType.Legumes,
+                "4" => ProductType.Fromages,
+                "5" => ProductType.Patisseries,
+                "6" => ProductType.Pains,
+                "7" => ProductType.Conserves,
+                "8" => ProductType.Suregelés,
+                _ => ProductType.Poissons
+            };
+
+            ProductRepository.AddProductToClient(clientId, name, productType, description, price);
+        }
+
+        public static void GetProductByNameHelper()
+        {
+            Console.Write("Quel est le nom du produit ?");
+            string productName = Console.ReadLine();
+
+            Product product = ProductRepository.GetProductByName(productName);
+
+            if (product == null)
+            {
+                Console.WriteLine("Aucun produit à afficher.");
+                return;
+            }
+
+            Console.WriteLine($"ID: {product.Id} - Name: {product.Name}");
+        }
+
+        public static void TransferProductHelper()
+        {
+            List<Client> clients = ClientRepository.GetAllClientsWithProducts();
+            int productId = PromptDisplayHelpers.PromptInt("Entrez l'ID du produit : ");
+            int newClientId = PromptDisplayHelpers.PromptInt("Entrez l'ID du nouveau client : ");
+
+            ClientRepository.TransferProductToAnotherClient(productId, newClientId);
+        }
+
+        
+
+        public static void RemoveProductHelper()
+        {
+            Console.WriteLine("Supprimer quel produit ?");
+            List<Product> products = ProductRepository.GetAllProducts();
+            PromptDisplayHelpers.DisplayProducts(products);
+            int productId = PromptDisplayHelpers.PromptInt("ID du produit ?");
+            ProductRepository.RemoveProductById(productId);
+        }
+
+        public static void EditProductHelper()
+        {
+            try
+            {
+                Console.WriteLine("Modifier quel produit ?");
+                List<Product> products = ProductRepository.GetAllProducts();
+                if (products.Count == 0)
+                {
+                    Console.WriteLine("Aucun produit disponible.");
+                    return;
+                }
+
+                PromptDisplayHelpers.DisplayProducts(products);
+                int productId = PromptDisplayHelpers.PromptInt("ID du produit ?");
+                Product? existingProduct = products.FirstOrDefault(p => p.Id == productId);
+                if (existingProduct == null)
+                {
+                    Console.WriteLine("Produit introuvable.");
+                    return;
+                }
+
+                string? name = PromptDisplayHelpers.PromptString("Nom ?");
+                string? description = PromptDisplayHelpers.PromptString("Description ?");
+                double price = PromptDisplayHelpers.PromptDouble("Prix ?");
+
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(description))
+                {
+                    Console.WriteLine("Entrée invalide.");
+                    return;
+                }
+
+                Product updatedProduct = new Product
+                {
+                    Name = name,
+                    Description = description,
+                    Price = price
+                };
+
+                ProductRepository.EditProductbyId(updatedProduct);
+                Console.WriteLine("Produit mis à jour avec succès.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur: {ex.Message}");
             }
         }
     }
