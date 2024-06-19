@@ -26,6 +26,7 @@ namespace CodeFirst.Repositories
             context.Clients!.Add(person);
 
             context.SaveChanges();
+            Console.WriteLine("Client ajouté avec succès");
         }
 
         public static List<Client> GetAll()
@@ -139,6 +140,7 @@ namespace CodeFirst.Repositories
             {
                 context.Clients.Remove(client);
                 context.SaveChanges();
+                Console.WriteLine("Client supprimé avec succès");
             }
             catch (Exception ex)
             {

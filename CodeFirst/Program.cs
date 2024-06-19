@@ -34,7 +34,7 @@ while (true)
             break;
 
         case "3":
-                ConsoleHelper.GetAllClientsWithProductsHelper();
+                ConsoleHelper.GetClientByIdWithProductsHelper();
                 Console.WriteLine("-------------------------------------------");
             break;
 
@@ -64,7 +64,7 @@ while (true)
             break;
 
         case "9":
-            ConsoleHelper.EditProductHelper);
+            ConsoleHelper.EditProductHelper();
             Console.WriteLine("-------------------------------------------");
             break;
 

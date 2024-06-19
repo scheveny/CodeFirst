@@ -166,8 +166,7 @@ namespace CodeFirst.Helpers
 
         public static void GetProductByNameHelper()
         {
-            Console.Write("Quel est le nom du produit ?");
-            string productName = Console.ReadLine();
+            string productName = PromptDisplayHelpers.PromptString("Nom du produit ?");
 
             Product product = ProductRepository.GetProductByName(productName);
 
@@ -177,7 +176,7 @@ namespace CodeFirst.Helpers
                 return;
             }
 
-            Console.WriteLine($"ID: {product.Id} - Name: {product.Name}");
+            Console.WriteLine($"ID: {product.Id} \n Name: {product.Name} \n Description : {product.Description} \n Prix : {product.Price}");
         }
 
         public static void TransferProductHelper()
@@ -235,7 +234,8 @@ namespace CodeFirst.Helpers
                 {
                     Name = name,
                     Description = description,
-                    Price = price
+                    Price = price,
+                    Id = existingProduct.Id
                 };
 
                 ProductRepository.EditProductbyId(updatedProduct);

@@ -26,6 +26,7 @@ namespace CodeFirst.Repositories
             context.Products!.Add(product);
 
             context.SaveChanges();
+            Console.WriteLine($"Produit {product.Name} ajouté avec succès");
         }
         public static void AddProductToClient(int clientId, string name, ProductType type, string description, double price)
         {
@@ -52,7 +53,7 @@ namespace CodeFirst.Repositories
 
             client.Products.Add(product);
             context.SaveChanges();
-            Console.WriteLine("Produit ajouté avec succès.");
+            Console.WriteLine($"Produit {product.Name} ajouté  au client avec succès.");
         }
 
         public static List<Product> GetAllProducts()
@@ -67,9 +68,9 @@ namespace CodeFirst.Repositories
         public static Product GetProductByName(string name)
         {
             ShopContext context = new ShopContext();
-            
+
             Product? product = context.Products!
-                .FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(p => p.Name.ToLower() == name.ToLower());
 
             if (product == null)
             {
@@ -97,7 +98,7 @@ namespace CodeFirst.Repositories
             p.Client = paramProduct.Client;
             
             context.SaveChanges();
-            Console.WriteLine("Client mis à jour avec succès.");
+            Console.WriteLine($"Produit {paramProduct.Name} mis à jour avec succès.");
         }
 
         public static void RemoveProductById(int id)
@@ -115,6 +116,7 @@ namespace CodeFirst.Repositories
             {
                 context.Products.Remove(p);
                 context.SaveChanges();
+                Console.WriteLine($"Produit {p.Name} supprimé avec succès");
             }
             catch (Exception ex)
             {
